@@ -30,6 +30,6 @@ export interface Controls {
 
 declare global {
     interface Window {
-        showOverlay: (overlayId: string) => void;
+        showOverlay?: (overlayId: string) => void;
     }
 }

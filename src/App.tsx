@@ -1,10 +1,11 @@
-import './App.css'
-import GameWindow from './components/GameWindow'
-function App() {
+import GameWindow from './components/GameWindow';
 
+const App = () => {
   return (
-    <GameWindow />
-  )
-}
+    <div className="w-screen min-h-screen bg-slate-800 flex justify-center items-center">
+      <GameWindow />
+    </div>
+  );
+};
 
-export default App
+export default App;
