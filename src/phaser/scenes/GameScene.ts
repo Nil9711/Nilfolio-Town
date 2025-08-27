@@ -80,7 +80,7 @@ export class GameScene extends Phaser.Scene {
                 height: 100,
                 color: 0xe74c3c, // Not used anymore but kept for compatibility
                 label: "Projects",
-                overlayId: "projects-overlay"
+                overlayId: 'projects-overlay'
             },
             {
                 x: 500,
@@ -89,7 +89,7 @@ export class GameScene extends Phaser.Scene {
                 height: 100,
                 color: 0x9b59b6,
                 label: "About Me",
-                overlayId: "about-overlay"
+                overlayId: 'about-overlay'
             }
         ];
 

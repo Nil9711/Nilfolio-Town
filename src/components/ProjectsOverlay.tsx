@@ -1,20 +1,18 @@
 import type { ClassValue } from "clsx";
-import { useState } from 'react';
 import { cn } from "../utils/utils";
 
 type Props = {
     className?: ClassValue;
+    onClose: Function
 }
 
-const ProjectsOverlay = ({ className }: Props) => {
-    const [isVisible, setIsVisible] = useState(false);
+const ProjectsOverlay = ({ onClose, className }: Props) => {
 
     return (
         <div className={cn(
             "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
             "bg-black/90 text-white p-8 rounded-lg max-w-md w-[90%] z-[1000]",
-            "border-2 border-blue-500",
-            isVisible ? "block" : "hidden",
+            "border-2 border-blue-500 block",
             className
         )}>
             <h2 className="text-blue-400 mb-4 text-center text-xl">🗂️ My Projects</h2>
@@ -30,7 +28,7 @@ const ProjectsOverlay = ({ className }: Props) => {
             </p>
             <button
                 className="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2.5 rounded float-right mt-2.5"
-                onClick={() => setIsVisible(false)}
+                onClick={() => onClose()}
             >
                 Close
             </button>

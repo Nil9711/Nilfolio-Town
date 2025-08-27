@@ -1,5 +1,7 @@
 import type Phaser from "phaser";
 
+export type OverlayType = "projects-overlay" | "about-overlay" | ""
+
 export interface GameConfig {
     width: number;
     height: number;
@@ -17,7 +19,7 @@ export interface House {
     height: number;
     color: number;
     label: string;
-    overlayId: string;
+    overlayId: OverlayType;
 }
 
 export interface Controls {
@@ -30,6 +32,7 @@ export interface Controls {
 
 declare global {
     interface Window {
-        showOverlay?: (overlayId: string) => void;
+        showOverlay?: (overlayId: OverlayType) => void;
+        closeOverlay?: () => void;
     }
 }
