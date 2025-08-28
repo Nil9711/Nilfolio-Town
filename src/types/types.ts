@@ -2,10 +2,6 @@ import type Phaser from "phaser";
 
 export type OverlayType = "projects-overlay" | "about-overlay" | ""
 
-export interface GameConfig {
-    width: number;
-    height: number;
-}
 
 export interface PlayerPosition {
     x: number;

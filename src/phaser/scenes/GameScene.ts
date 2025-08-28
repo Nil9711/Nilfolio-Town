@@ -7,15 +7,17 @@ export class GameScene extends Phaser.Scene {
     private houses: House[] = [];
     private interactionPrompt!: Phaser.GameObjects.Text;
     private currentNearHouse: House | null = null;
+    private map!: Phaser.Tilemaps.Tilemap;
 
     constructor() {
         super({ key: 'GameScene' });
     }
 
     create(): void {
-        // Create the world
+        // Create the world with tilemap
         this.createWorld();
         this.createPlayer();
+        this.setupCollisions(); // Set up collisions after player is created
         this.createHouses();
         this.createUI();
         this.setupControls();
@@ -23,173 +25,81 @@ export class GameScene extends Phaser.Scene {
     }
 
     private createWorld(): void {
-        const tileSize = 16; // Kenny's tiles are 16x16
-        const scale = 2; // Scale up the tiles
+        // Create tilemap
+        this.map = this.add.tilemap('map');
+        const tileset = this.map.addTilesetImage('Roguelike', 'tiles');
 
-        // Create sandy ground using sand tiles
-        this.createSandyGround(tileSize, scale);
+        if (!tileset) {
+            console.error("Failed to load tileset");
+            return;
+        }
 
-        // Create world boundaries
-        this.physics.world.setBounds(0, 0, 800, 600);
+        // Create all layers
+        const availableLayers = this.map.layers.map(l => l.name);
+        console.log('Available layers:', availableLayers);
+
+        availableLayers.forEach(layerName => {
+            const layer = this.map.createLayer(layerName, tileset);
+            console.log(`Created layer: ${layerName}`, layer);
+        });
+
+        // Set world bounds based on map size
+        this.physics.world.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
     }
 
-    private createSandyGround(tileSize: number, scale: number): void {
-        // Fill the world with sand tiles, using variety for texture
-        for (let x = 0; x < 25; x++) {
-            for (let y = 0; y < 19; y++) {
-                // Use different sand tiles for variety
-                let sandType = 'sand1'; // Default
-                const rand = Math.random();
+    private setupCollisions(): void {
+        // Get the layers that should have collision
+        const objectsLayer = this.map.getLayer('Objects')?.tilemapLayer;
+        const doorsLayer = this.map.getLayer('Doors/windows/roof')?.tilemapLayer;
+        const roofLayer = this.map.getLayer('Roof object')?.tilemapLayer;
 
-                if (rand > 0.8) {
-                    sandType = 'sand2';
-                } else if (rand > 0.6) {
-                    sandType = 'sand3';
-                } else if (rand > 0.4) {
-                    sandType = 'sand4';
-                }
+        // Set collision on non-walkable layers
+        if (objectsLayer) {
+            objectsLayer.setCollisionByExclusion([-1, 0]);
+            this.physics.add.collider(this.player, objectsLayer);
+            console.log('Added collision to Objects layer');
+        }
 
-                const tile = this.add.image(x * tileSize * scale, y * tileSize * scale, sandType);
-                tile.setOrigin(0).setScale(scale);
-            }
+        if (doorsLayer) {
+            doorsLayer.setCollisionByExclusion([-1, 0]);
+            this.physics.add.collider(this.player, doorsLayer);
+            console.log('Added collision to Doors layer');
+        }
+
+        if (roofLayer) {
+            roofLayer.setCollisionByExclusion([-1, 0]);
+            this.physics.add.collider(this.player, roofLayer);
+            console.log('Added collision to Roof layer');
         }
     }
 
     private createPlayer(): void {
-        const startPos: PlayerPosition = { x: 400, y: 500 };
+        // Position player in the middle of the map
+        const startPos: PlayerPosition = {
+            x: this.map.widthInPixels / 2,
+            y: this.map.heightInPixels / 2
+        };
 
         // Create player with idle sprite
         this.player = this.physics.add.sprite(startPos.x, startPos.y, 'player_idle');
         this.player.setCollideWorldBounds(true);
-        this.player.setScale(0.5); // Keep it small as requested
+        this.player.setScale(0.3); // Made smaller
 
         // Player physics
         this.player.body!.setSize(12, 12); // Adjust hitbox as needed
         (this.player.body as Phaser.Physics.Arcade.Body).setDrag(300, 300);
 
-        // Start with idle animation
-        this.player.play('player_idle_anim');
+        // No idle animation for now - just use the static sprite
     }
 
     private createHouses(): void {
-        this.houses = [
-            {
-                x: 100,
-                y: 150,
-                width: 120,
-                height: 100,
-                color: 0xe74c3c, // Not used anymore but kept for compatibility
-                label: "Projects",
-                overlayId: 'projects-overlay'
-            },
-            {
-                x: 500,
-                y: 150,
-                width: 120,
-                height: 100,
-                color: 0x9b59b6,
-                label: "About Me",
-                overlayId: 'about-overlay'
-            }
-        ];
-
-        // Create detailed houses using Kenny tiles
-        this.createDetailedHouse(this.houses[0], 'wall_brown', 'door_wood', 'Projects House');
-        this.createDetailedHouse(this.houses[1], 'wall_stone', 'door_metal', 'About House');
-
-        // Create collision areas
-        this.houses.forEach((house) => {
-            const collider = this.physics.add.staticGroup();
-            const houseCollider = collider.create(
-                house.x + house.width / 2,
-                house.y + house.height / 2,
-                undefined
-            );
-            houseCollider.body!.setSize(house.width + 40, house.height + 40);
-            houseCollider.setVisible(false);
-        });
-    }
-
-    private createDetailedHouse(house: House, wallType: string, doorType: string, signText: string): void {
-        const tileSize = 16;
-        const scale = 2;
-
-        // Create house foundation
-        for (let x = 0; x < 4; x++) {
-            for (let y = 0; y < 3; y++) {
-                const wall = this.add.image(
-                    house.x + x * tileSize * scale,
-                    house.y + y * tileSize * scale,
-                    wallType
-                );
-                wall.setOrigin(0).setScale(scale);
-            }
-        }
-
-        // Add roof tiles
-        for (let x = 0; x < 4; x++) {
-            const roofTile = this.add.image(
-                house.x + x * tileSize * scale,
-                house.y - tileSize * scale,
-                'roof'
-            );
-            roofTile.setOrigin(0).setScale(scale);
-        }
-
-        // Add door
-        const door = this.add.image(
-            house.x + tileSize * scale * 1.5,
-            house.y + tileSize * scale * 2,
-            doorType
-        );
-        door.setOrigin(0).setScale(scale);
-
-        // Add windows
-        const window1 = this.add.image(
-            house.x + tileSize * scale * 0.5,
-            house.y + tileSize * scale * 1,
-            'window'
-        );
-        window1.setOrigin(0).setScale(scale);
-
-        const window2 = this.add.image(
-            house.x + tileSize * scale * 2.5,
-            house.y + tileSize * scale * 1,
-            'window'
-        );
-        window2.setOrigin(0).setScale(scale);
-
-        // Add decorative chest next to house
-        const chest = this.add.image(
-            house.x - tileSize * scale,
-            house.y + tileSize * scale * 2,
-            'chest'
-        );
-        chest.setOrigin(0).setScale(scale);
-
-        // House label with better positioning
-        this.add.text(
-            house.x + house.width / 2,
-            house.y - 60,
-            signText,
-            {
-                fontSize: '14px',
-                color: '#ffffff',
-                stroke: '#000000',
-                strokeThickness: 3,
-                backgroundColor: '#8B4513',
-                padding: { x: 6, y: 3 }
-            }
-        ).setOrigin(0.5);
+        // Houses are now in the tilemap, so we don't need to create them here
+        // This method can be removed or used for other purposes
     }
 
     private createUI(): void {
-        this.interactionPrompt = this.add.text(400, 50, '', {
-            fontSize: '18px',
-            color: '#ffffff',
-            backgroundColor: '#000000',
-            padding: { x: 10, y: 5 }
-        }).setOrigin(0.5).setVisible(false).setScrollFactor(0);
+        // Removed house interaction UI since houses are now in tilemap
+        // You can add other UI elements here if needed
     }
 
     private setupControls(): void {
@@ -210,14 +120,17 @@ export class GameScene extends Phaser.Scene {
     }
 
     private setupCamera(): void {
-        this.cameras.main.setBounds(0, 0, 800, 600);
+        // Set camera bounds to match the tilemap size
+        this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         this.cameras.main.startFollow(this.player, true, 0.05, 0.05);
+
+        // Optional: Set initial zoom
+        // this.cameras.main.setZoom(1.5);
     }
 
     update(): void {
         this.handlePlayerMovement();
-        this.checkHouseProximity();
-        this.handleInteraction();
+        // Removed house proximity and interaction since houses are now in tilemap
     }
 
     private handlePlayerMovement(): void {
@@ -248,49 +161,24 @@ export class GameScene extends Phaser.Scene {
 
         this.player.setVelocity(velocityX, velocityY);
 
-        // Handle animations
+        // Handle animations - simplified since no idle animation yet
         if (velocityX !== 0 || velocityY !== 0) {
             // Player is moving - play walking animation
             if (this.player.anims.currentAnim?.key !== 'player_walk') {
                 this.player.play('player_walk');
             }
         } else {
-            // Player is idle - play idle animation
-            if (this.player.anims.currentAnim?.key !== 'player_idle_anim') {
-                this.player.play('player_idle_anim');
-            }
+            // Player is idle - stop animation and show idle sprite
+            this.player.anims.stop();
+            this.player.setTexture('player_idle');
         }
     }
 
     private checkHouseProximity(): void {
-        this.currentNearHouse = null;
-
-        for (const house of this.houses) {
-            const distance = Phaser.Math.Distance.Between(
-                this.player.x,
-                this.player.y,
-                house.x + house.width / 2,
-                house.y + house.height / 2
-            );
-
-            if (distance < 80) { // Interaction range
-                this.currentNearHouse = house;
-                this.interactionPrompt.setText(`Press SPACE to visit ${house.label}`);
-                this.interactionPrompt.setVisible(true);
-                break;
-            }
-        }
-
-        if (!this.currentNearHouse) {
-            this.interactionPrompt.setVisible(false);
-        }
+        // Removed - houses are now in tilemap
     }
 
     private handleInteraction(): void {
-        if (Phaser.Input.Keyboard.JustDown(this.controls.space) && this.currentNearHouse) {
-            if (window.showOverlay) {
-                window.showOverlay(this.currentNearHouse.overlayId);
-            }
-        }
+        // Removed - will need to be reimplemented for tilemap-based interactions
     }
 }
