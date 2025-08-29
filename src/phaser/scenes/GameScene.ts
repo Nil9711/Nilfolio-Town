@@ -1,12 +1,9 @@
 import Phaser from 'phaser';
-import type { Controls, House, PlayerPosition } from '../../types/types';
+import type { Controls, PlayerPosition } from '../../types/types';
 
 export class GameScene extends Phaser.Scene {
     private player!: Phaser.Physics.Arcade.Sprite;
     private controls!: Controls;
-    private houses: House[] = [];
-    private interactionPrompt!: Phaser.GameObjects.Text;
-    private currentNearHouse: House | null = null;
     private map!: Phaser.Tilemaps.Tilemap;
 
     constructor() {
@@ -18,8 +15,6 @@ export class GameScene extends Phaser.Scene {
         this.createWorld();
         this.createPlayer();
         this.setupCollisions(); // Set up collisions after player is created
-        this.createHouses();
-        this.createUI();
         this.setupControls();
         this.setupCamera();
     }
@@ -48,28 +43,14 @@ export class GameScene extends Phaser.Scene {
     }
 
     private setupCollisions(): void {
-        // Get the layers that should have collision
-        const objectsLayer = this.map.getLayer('Objects')?.tilemapLayer;
-        const doorsLayer = this.map.getLayer('Doors/windows/roof')?.tilemapLayer;
-        const roofLayer = this.map.getLayer('Roof object')?.tilemapLayer;
-
-        // Set collision on non-walkable layers
-        if (objectsLayer) {
-            objectsLayer.setCollisionByExclusion([-1, 0]);
-            this.physics.add.collider(this.player, objectsLayer);
-            console.log('Added collision to Objects layer');
-        }
-
-        if (doorsLayer) {
-            doorsLayer.setCollisionByExclusion([-1, 0]);
-            this.physics.add.collider(this.player, doorsLayer);
-            console.log('Added collision to Doors layer');
-        }
-
-        if (roofLayer) {
-            roofLayer.setCollisionByExclusion([-1, 0]);
-            this.physics.add.collider(this.player, roofLayer);
-            console.log('Added collision to Roof layer');
+        const unwalkableLayersNames = ['Water', 'Objects', 'Doors/windows/roof', 'Roof object']
+        for (const unwalkableLayerName of unwalkableLayersNames) {
+            const unwalkableLayer = this.map.getLayer(unwalkableLayerName)?.tilemapLayer;
+            if (unwalkableLayer) {
+                unwalkableLayer.setCollisionByExclusion([-1, 0]);
+                this.physics.add.collider(this.player, unwalkableLayer);
+                console.log(`Added collision to ${unwalkableLayerName} layer`);
+            }
         }
     }
 
@@ -90,16 +71,6 @@ export class GameScene extends Phaser.Scene {
         (this.player.body as Phaser.Physics.Arcade.Body).setDrag(300, 300);
 
         // No idle animation for now - just use the static sprite
-    }
-
-    private createHouses(): void {
-        // Houses are now in the tilemap, so we don't need to create them here
-        // This method can be removed or used for other purposes
-    }
-
-    private createUI(): void {
-        // Removed house interaction UI since houses are now in tilemap
-        // You can add other UI elements here if needed
     }
 
     private setupControls(): void {
@@ -130,7 +101,6 @@ export class GameScene extends Phaser.Scene {
 
     update(): void {
         this.handlePlayerMovement();
-        // Removed house proximity and interaction since houses are now in tilemap
     }
 
     private handlePlayerMovement(): void {
@@ -172,13 +142,5 @@ export class GameScene extends Phaser.Scene {
             this.player.anims.stop();
             this.player.setTexture('player_idle');
         }
-    }
-
-    private checkHouseProximity(): void {
-        // Removed - houses are now in tilemap
-    }
-
-    private handleInteraction(): void {
-        // Removed - will need to be reimplemented for tilemap-based interactions
     }
 }
