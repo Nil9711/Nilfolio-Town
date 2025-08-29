@@ -50,7 +50,7 @@ const GameWindow = ({ className }: Props) => {
 
     return (
         <div className={cn("relative border-2 border-slate-600 rounded-lg", className)}>
-            <div ref={gameContainerRef} className="w-[800px] h-[600px]" />
+            <div ref={gameContainerRef} className="w-full h-[500px]" />
 
             {/* {activeOverlay === 'projects-overlay' && (
                 <ProjectsOverlay onClose={closeOverlay} />

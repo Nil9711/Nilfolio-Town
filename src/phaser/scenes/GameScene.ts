@@ -66,6 +66,7 @@ export class GameScene extends Phaser.Scene {
         // Player physics
         this.player.body!.setSize(7, 7); // Adjust hitbox as needed
         (this.player.body as Phaser.Physics.Arcade.Body).setDrag(300, 300);
+        this.player.preFX?.addGlow(0x000000, 0.2, 0, false, 0.01, 8);
 
         // No idle animation for now - just use the static sprite
     }

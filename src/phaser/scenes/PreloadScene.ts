@@ -28,7 +28,6 @@ export class PreloadScene extends Phaser.Scene {
       repeat: -1
     });
 
-    // Just start the game scene
     this.scene.start('GameScene');
   }
 }

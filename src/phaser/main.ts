@@ -10,8 +10,9 @@ export const createPhaserGame = (parentElement: HTMLElement): Phaser.Game => {
         width: 608,
         height: 560,
         scale: {
-            mode: Phaser.Scale.FIT, // Fit to container while maintaining aspect ratio
-            autoCenter: Phaser.Scale.CENTER_BOTH
+            mode: Phaser.Scale.RESIZE,
+            autoCenter: Phaser.Scale.CENTER_BOTH,
+
         },
         scene: [PreloadScene, GameScene],
         physics: {
