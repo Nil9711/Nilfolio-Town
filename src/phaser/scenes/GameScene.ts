@@ -31,11 +31,9 @@ export class GameScene extends Phaser.Scene {
 
         // Create all layers
         const availableLayers = this.map.layers.map(l => l.name);
-        console.log('Available layers:', availableLayers);
 
         availableLayers.forEach(layerName => {
-            const layer = this.map.createLayer(layerName, tileset);
-            console.log(`Created layer: ${layerName}`, layer);
+            this.map.createLayer(layerName, tileset);
         });
 
         // Set world bounds based on map size
@@ -49,7 +47,6 @@ export class GameScene extends Phaser.Scene {
             if (unwalkableLayer) {
                 unwalkableLayer.setCollisionByExclusion([-1, 0]);
                 this.physics.add.collider(this.player, unwalkableLayer);
-                console.log(`Added collision to ${unwalkableLayerName} layer`);
             }
         }
     }
@@ -57,8 +54,8 @@ export class GameScene extends Phaser.Scene {
     private createPlayer(): void {
         // Position player in the middle of the map
         const startPos: PlayerPosition = {
-            x: this.map.widthInPixels / 2,
-            y: this.map.heightInPixels / 2
+            x: this.map.widthInPixels / 2 - 275,
+            y: this.map.heightInPixels / 2 + 133
         };
 
         // Create player with idle sprite
@@ -67,7 +64,7 @@ export class GameScene extends Phaser.Scene {
         this.player.setScale(0.3); // Made smaller
 
         // Player physics
-        this.player.body!.setSize(12, 12); // Adjust hitbox as needed
+        this.player.body!.setSize(7, 7); // Adjust hitbox as needed
         (this.player.body as Phaser.Physics.Arcade.Body).setDrag(300, 300);
 
         // No idle animation for now - just use the static sprite
@@ -131,14 +128,9 @@ export class GameScene extends Phaser.Scene {
 
         this.player.setVelocity(velocityX, velocityY);
 
-        // Handle animations - simplified since no idle animation yet
         if (velocityX !== 0 || velocityY !== 0) {
-            // Player is moving - play walking animation
-            if (this.player.anims.currentAnim?.key !== 'player_walk') {
-                this.player.play('player_walk');
-            }
+            this.player.play('player_walk', true); // The 'true' forces restart
         } else {
-            // Player is idle - stop animation and show idle sprite
             this.player.anims.stop();
             this.player.setTexture('player_idle');
         }
