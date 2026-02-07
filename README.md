@@ -4,15 +4,15 @@ An interactive portfolio website disguised as a 2D retro-style village. Instead 
 
 ## Technologies
 
-| Category | Technology |
-|---|---|
-| Framework | React 19 |
-| Game Engine | Phaser 3 |
-| Language | TypeScript 5.8 |
-| Styling | Tailwind CSS 4 |
-| Build Tool | Vite 7 |
-| Utilities | clsx, tailwind-merge |
-| Linting | ESLint 9, typescript-eslint |
+| Category    | Technology                  |
+| ----------- | --------------------------- |
+| Framework   | React 19                    |
+| Game Engine | Phaser 3                    |
+| Language    | TypeScript 5.8              |
+| Styling     | Tailwind CSS 4              |
+| Build Tool  | Vite 7                      |
+| Utilities   | clsx, tailwind-merge        |
+| Linting     | ESLint 9, typescript-eslint |
 
 ## Architecture
 
@@ -71,11 +71,7 @@ npm run lint
 
 ## Controls
 
-| Key | Action |
-|---|---|
-| Arrow Keys / WASD | Move |
-| Space | Interact |
-
-## License
-
-Private project.
+| Key               | Action   |
+| ----------------- | -------- |
+| Arrow Keys / WASD | Move     |
+| Space             | Interact |
